@@ -134,7 +134,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
         val imageRegex = Regex("class=\"_WCg\" height=\"[0-9]*\" title=\"(.*?)\"")
         val match = imageRegex.find(document.body().html())
         if (match != null) {
-            val url : URL = URL(match.value)
+            val url : URL = URL(match.groupValues[1])
             val inputStream = BufferedInputStream(url.openStream())
             val out = ByteArrayOutputStream()
             val buf = ByteArray(1024)

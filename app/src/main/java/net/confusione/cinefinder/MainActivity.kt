@@ -1,19 +1,21 @@
 package net.confusione.cinefinder
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.Image
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.*
+import android.widget.*
 import java.util.*
-import android.widget.TextView
-import android.widget.ArrayAdapter
-import android.widget.BaseAdapter
-import android.widget.ListView
+import kotlinx.android.synthetic.main.list_item.view.*
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
+import org.apache.commons.codec.binary.Base64
 
 
 class MainActivity : AppCompatActivity(){
@@ -94,8 +96,40 @@ class MainActivity : AppCompatActivity(){
             else
                 convertView = _convertView
 
+            val imageView = convertView.findViewById<ImageView>(R.id.image)
+            var bMap : Bitmap? = null          //TODO : Implement Blanck Image
+            if (movieList[i].image != "") {
+                val binaryImage = Base64.decodeBase64(movieList[i].image)
+                bMap = BitmapFactory.decodeByteArray(binaryImage, 0, binaryImage.size)
+            }
+            if (bMap != null)
+                imageView.setImageBitmap(bMap)
+
             val titleView = convertView.findViewById<TextView>(R.id.title)
             titleView.text = movieList[i].title
+
+            val lengthView = convertView.findViewById<TextView>(R.id.length)
+            lengthView.text = movieList[i].length
+
+            val timeSchedule : ArrayList<Show> = googleMovies.getTimeSchedule(movieList[i])
+            val timeScheduleView = convertView.findViewById<TextView>(R.id.time_schedule)
+            var temp : String = ""
+            for (show in timeSchedule){
+                val calendar : Calendar = Calendar.getInstance()
+                calendar.time = show.timeSchedule
+                temp += calendar.get(Calendar.HOUR_OF_DAY).toString()
+
+                if (calendar.get(Calendar.MINUTE) < 10)
+                    temp += ":0"+calendar.get(Calendar.MINUTE).toString()
+                else
+                    temp += ":"+calendar.get(Calendar.MINUTE).toString()
+
+                if (show != timeSchedule.last())
+                    temp += " -- "
+            }
+            timeScheduleView.text = temp
+
+            convertView.minimumHeight = 350
 
             return convertView
 

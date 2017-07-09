@@ -83,6 +83,7 @@ class JsonCache(val context: Context) {
 
     private fun readMovies_List(reader: JsonReader) : ArrayList<Movie> {
         val movies = ArrayList<Movie>()
+        return  movies // ToDo = Enable caches
         reader.beginArray()
         while (reader.hasNext())
             movies.add(readMovies_Movie(reader))
@@ -116,7 +117,8 @@ class JsonCache(val context: Context) {
                 reader.skipValue()
         }
         reader.endObject()
-        return Movie(title,description,cast,releaseDate,length,standard)
+        return Movie(title,description,cast,releaseDate,length,"",standard)
+        //TODO = Image caches
     }
 
     private fun readMovies_Cast(reader: JsonReader) : ArrayList<String> {
