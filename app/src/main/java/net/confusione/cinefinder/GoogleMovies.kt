@@ -3,12 +3,14 @@ package net.confusione.cinefinder
 import android.content.Context
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
-import android.util.JsonReader
-import android.util.JsonWriter
+import org.apache.commons.codec.binary.Base64
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
+import java.io.BufferedInputStream
+import java.io.ByteArrayOutputStream
 import java.lang.ref.WeakReference
+import java.net.URL
 import java.util.*
 
 class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
@@ -117,14 +119,37 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
         val movie_description = getMovieDescription(document)
         val movie_cast = getMovieCast(document)
         val movie_releaseDate = getMovieReleaseDate(document)
+        val movie_image = getMovieImage(document)
 
-        movie = Movie(movie_title, movie_description, movie_cast, movie_releaseDate, movie_length)
+        movie = Movie(movie_title, movie_description, movie_cast, movie_releaseDate, movie_length, movie_image)
         if (context != null) {
             val jsonCache = JsonCache(context)
             jsonCache.writeMovie(movie)
         }
 
         return movie
+    }
+
+    private fun getMovieImage(document: Document) : String {
+        val imageRegex = Regex("class=\"_WCg\" height=\"[0-9]*\" title=\"(.*?)\"")
+        val match = imageRegex.find(document.body().html())
+        if (match != null) {
+            val url : URL = URL(match.value)
+            val inputStream = BufferedInputStream(url.openStream())
+            val out = ByteArrayOutputStream()
+            val buf = ByteArray(1024)
+            var n = inputStream.read(buf)
+            while (-1 != n) {
+                out.write(buf, 0, n)
+                n = inputStream.read(buf)
+            }
+            out.close()
+            inputStream.close()
+            val response = out.toByteArray()
+            val base64String = Base64.encodeBase64String(response)
+            return base64String
+        }
+        return ""
     }
 
     private fun getMovieLength(document: Document) : String {
