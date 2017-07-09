@@ -94,6 +94,16 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
         return movieTheaters
     }
 
+    fun getTimeSchedule(movie: Movie) : ArrayList<Show> {
+        val shows = ArrayList<Show>()
+        for (cinema in movieTheaters) {
+            val dates = cinema.getTimeSchedule(movie)
+            for (date in dates)
+                shows.add(Show(cinema.name,date,movie))
+        }
+        return shows
+    }
+
     fun getMovieInfo(movie_title: String) : Movie {
         val context : Context? = weakContext.get()
         if (movies[preHashTitle(movie_title)] != null)
