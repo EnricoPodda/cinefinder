@@ -22,7 +22,7 @@ class Cinema(val name: String) {
         return result
     }
 
-    fun getDateForMovie(movie: Movie) : ArrayList<Date> {
+    fun getTimeSchedule(movie: Movie) : ArrayList<Date> {
         val result = shows[movie]
         if (result != null)
             return result

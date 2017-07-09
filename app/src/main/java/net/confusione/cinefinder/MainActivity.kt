@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(){
                 val movies = cinema.getAllMovies()
                 for (movie in movies) {
                     Log.d("Debug","    "+movie.title)
-                    val dates = cinema.getDateForMovie(movie)
+                    val dates = cinema.getTimeSchedule(movie)
                     for (date in dates)
                         Log.d("Debug",date.toString())
                     Log.d("Debug","----------------------------")
