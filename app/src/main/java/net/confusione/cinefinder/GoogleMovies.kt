@@ -78,7 +78,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
                             val hour = match.groupValues[1]
                             val minute = match.groupValues[2]
                             calendar = Calendar.getInstance()
-                            calendar.set(Calendar.HOUR, hour.toInt())
+                            calendar.set(Calendar.HOUR_OF_DAY, hour.toInt())
                             calendar.set(Calendar.MINUTE, minute.toInt())
                             calendar.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
                             calendar.add(Calendar.DAY_OF_MONTH, counter)
