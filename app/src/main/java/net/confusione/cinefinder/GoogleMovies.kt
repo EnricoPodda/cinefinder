@@ -36,7 +36,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
         populateMovieTheaters(movieTheaters)
 
         for (cinema in movieTheaters) {
-            val url: String = "https://www.google.it/search?q=$cinema+$location+film"
+            val url: String = "https://www.google.it/search?q="+Uri.encode(cinema.name)+"$location+film"
             val dayClassName = "tb_c"
             val movieFrameClassName = "lr_c_fcb"
             val titleClassName = "lr-s-din"
@@ -100,7 +100,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
             return movies[preHashTitle(movie_title)]!!
 
         val movie: Movie
-        val detailsUrl = "https://www.google.it/search?q=$movie_title+durata"
+        val detailsUrl = "https://www.google.it/search?q="+Uri.encode(movie_title)+"+durata"
         val document = Jsoup.connect(detailsUrl).get()
 
         val movie_length = getMovieLength(document)
