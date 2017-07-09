@@ -3,19 +3,15 @@ package net.confusione.cinefinder
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.view.*
 import android.widget.*
 import java.util.*
-import kotlinx.android.synthetic.main.list_item.view.*
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
-import org.apache.commons.codec.binary.Base64
 
 
 class MainActivity : AppCompatActivity(){
@@ -97,9 +93,9 @@ class MainActivity : AppCompatActivity(){
                 convertView = _convertView
 
             val imageView = convertView.findViewById<ImageView>(R.id.image)
-            var bMap : Bitmap? = null          //TODO : Implement Blanck Image
+            var bMap : Bitmap? = null          //TODO : Implement Blank Image
             if (movieList[i].image != "") {
-                val binaryImage = Base64.decodeBase64(movieList[i].image)
+                val binaryImage = android.util.Base64.decode(movieList[i].image,android.util.Base64.NO_WRAP)
                 bMap = BitmapFactory.decodeByteArray(binaryImage, 0, binaryImage.size)
             }
             if (bMap != null)

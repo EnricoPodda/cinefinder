@@ -3,7 +3,6 @@ package net.confusione.cinefinder
 import android.content.Context
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
-import org.apache.commons.codec.binary.Base64
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -112,7 +111,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
             return movies[preHashTitle(movie_title)]!!
 
         val movie: Movie
-        val detailsUrl = "https://www.google.it/search?q="+Uri.encode(movie_title)+"+durata"
+        val detailsUrl = "https://www.google.it/search?q="+Uri.encode(movie_title)+"+length"
         val document = Jsoup.connect(detailsUrl).get()
 
         val movie_length = getMovieLength(document)
@@ -146,7 +145,8 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
             out.close()
             inputStream.close()
             val response = out.toByteArray()
-            val base64String = Base64.encodeBase64String(response)
+            val base64String = android.util.Base64.encodeToString(response,android.util.Base64.NO_WRAP)
+
             return base64String
         }
         return ""
