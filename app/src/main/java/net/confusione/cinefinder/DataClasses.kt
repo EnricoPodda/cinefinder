@@ -18,4 +18,4 @@ data class Movie(val title: String, val description: String, val cast: ArrayList
     }
 }
 
-data class Show(val cinema: String, val date: Date, val movie: Movie)
+data class Show(val cinema: String, val timeSchedule: Date, val movie: Movie)

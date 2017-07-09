@@ -1,17 +1,16 @@
 package net.confusione.cinefinder
 
 import java.util.*
-import java.util.*
 
 class Cinema(val name: String) {
     private val shows = Hashtable<Movie,ArrayList<Date>>()
 
     fun addShow(show: Show) {
         if (shows.containsKey(show.movie))
-            shows[show.movie]!!.add(show.date)
+            shows[show.movie]!!.add(show.timeSchedule)
         else {
             shows[show.movie] = ArrayList<Date>()
-            shows[show.movie]!!.add(show.date)
+            shows[show.movie]!!.add(show.timeSchedule)
         }
     }
 
