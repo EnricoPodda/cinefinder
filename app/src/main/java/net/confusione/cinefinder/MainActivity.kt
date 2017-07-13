@@ -9,9 +9,15 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.*
+import kotlinx.android.synthetic.main.list_item.view.*
+import kotlinx.android.synthetic.main.list_schedule.view.*
 import java.util.*
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
+import org.apache.commons.codec.binary.Base64
+import org.joda.time.DateTime
+import java.util.zip.Inflater
+import kotlin.concurrent.timer
 
 
 class MainActivity : AppCompatActivity(){
@@ -55,18 +61,19 @@ class MainActivity : AppCompatActivity(){
                     Log.d("Debug","----------------------------")
                 }
             }*/
+
             val tmp = weakActivity.get()
             if (tmp != null) {
                 val activity : AppCompatActivity = tmp
                 val listView : ListView = activity.findViewById<ListView>(R.id.list_view)
-                val arrayAdapter = MyAdapter(activity.baseContext, googleMovies)
+                val arrayAdapter = MoviesAdapter(activity.baseContext, googleMovies)
                 listView.adapter = arrayAdapter
             }
         }
 
     }
 
-    class MyAdapter (val context : Context, val googleMovies: GoogleMovies) : BaseAdapter(){
+    class MoviesAdapter(val context : Context, val googleMovies: GoogleMovies) : BaseAdapter(){
 
         private var layoutInflater : LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         private val movieList = ArrayList<Movie> (googleMovies.movies.values)
@@ -93,9 +100,9 @@ class MainActivity : AppCompatActivity(){
                 convertView = _convertView
 
             val imageView = convertView.findViewById<ImageView>(R.id.image)
-            var bMap : Bitmap? = null          //TODO : Implement Blank Image
+            var bMap : Bitmap? = null          //TODO : Implement Blanck Image
             if (movieList[i].image != "") {
-                val binaryImage = android.util.Base64.decode(movieList[i].image,android.util.Base64.NO_WRAP)
+                val binaryImage = android.util.Base64.decode(movieList[i].image, android.util.Base64.NO_WRAP)
                 bMap = BitmapFactory.decodeByteArray(binaryImage, 0, binaryImage.size)
             }
             if (bMap != null)
@@ -107,23 +114,10 @@ class MainActivity : AppCompatActivity(){
             val lengthView = convertView.findViewById<TextView>(R.id.length)
             lengthView.text = movieList[i].length
 
-            val timeSchedule : ArrayList<Show> = googleMovies.getTimeSchedule(movieList[i])
-            val timeScheduleView = convertView.findViewById<TextView>(R.id.time_schedule)
-            var temp : String = ""
-            for (show in timeSchedule){
-                val calendar : Calendar = Calendar.getInstance()
-                calendar.time = show.timeSchedule
-                temp += calendar.get(Calendar.HOUR_OF_DAY).toString()
 
-                if (calendar.get(Calendar.MINUTE) < 10)
-                    temp += ":0"+calendar.get(Calendar.MINUTE).toString()
-                else
-                    temp += ":"+calendar.get(Calendar.MINUTE).toString()
-
-                if (show != timeSchedule.last())
-                    temp += " -- "
-            }
-            timeScheduleView.text = temp
+            //TODO: WeakReference(this)
+            val timeScheduleListView = convertView.list_schedule
+            timeScheduleListView.adapter = ScheduleAdapter(context, googleMovies.getTimeSchedule(movieList[i]))
 
             convertView.minimumHeight = 350
 
@@ -131,6 +125,42 @@ class MainActivity : AppCompatActivity(){
 
         }
 
+    }
+
+    class ScheduleAdapter(val context : Context, val shows : ArrayList<Show>) : BaseAdapter(){
+        //TODO: think about context
+
+        val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+        override fun getCount(): Int {
+            return shows.size
+        }
+
+        override fun getItem(i : Int): Any {
+            return shows[i]
+        }
+
+        override fun getItemId(i : Int): Long {
+            return shows[i].hashCode().toLong()
+        }
+
+        override fun getView(i: Int, _view: View?, _viewGroup: ViewGroup?): View {
+
+            val view : View
+
+            if(_view != null)
+                view = _view
+            else
+                view = layoutInflater.inflate(R.layout.list_schedule , _viewGroup, false)
+
+
+            //TODO: date everywhere
+            val time : DateTime = DateTime(shows[i].timeSchedule)
+            view.time_schedule.text = time.hourOfDay.toString() + ":" + time.minuteOfHour.toString()
+
+            return view
+
+        }
     }
 
 }
