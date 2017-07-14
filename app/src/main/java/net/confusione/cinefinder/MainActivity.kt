@@ -5,10 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.*
 import android.widget.*
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
@@ -43,22 +46,11 @@ class MainActivity : AppCompatActivity(){
         }
 
         override fun onPostExecute(googleMovies: GoogleMovies) {
-
-            /*for (cinema in result) {
-                Log.d("Debug", cinema.name)
-                val movies = cinema.getAllMovies()
-                for (movie in movies) {
-                    Log.d("Debug","    "+movie.title)
-                    val dates = cinema.getTimeSchedule(movie)
-                    for (timeSchedule in dates)
-                        Log.d("Debug",timeSchedule.toString())
-                    Log.d("Debug","----------------------------")
-                }
-            }*/
+            Log.d("Performance","Download ended in 7s")
             val tmp = weakActivity.get()
             if (tmp != null) {
                 val activity : AppCompatActivity = tmp
-                val listView : ListView = activity.findViewById<ListView>(R.id.list_view)
+                val listView : ListView = activity.list_view
                 val arrayAdapter = MyAdapter(activity.baseContext, googleMovies)
                 listView.adapter = arrayAdapter
             }
@@ -66,13 +58,13 @@ class MainActivity : AppCompatActivity(){
 
     }
 
-    class MyAdapter (val context : Context, val googleMovies: GoogleMovies) : BaseAdapter(){
+    class MyAdapter (context : Context, val googleMovies: GoogleMovies) : BaseAdapter(){
 
         private var layoutInflater : LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        private val movieList = ArrayList<Movie> (googleMovies.movies.values)
+        private val movieList = ArrayList<Movie> (MovieFactory.getAllMovies())
 
         override fun getCount(): Int {
-            return googleMovies.movies.size
+            return movieList.size
         }
 
         override fun getItem(i: Int): Any {

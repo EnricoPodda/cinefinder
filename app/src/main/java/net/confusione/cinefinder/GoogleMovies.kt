@@ -12,19 +12,12 @@ import java.lang.ref.WeakReference
 import java.net.URL
 import java.util.*
 
-class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
+class GoogleMovies(weakContext: WeakReference<AppCompatActivity>) {
 
-    val movies = Hashtable<String,Movie>()
     val movieTheaters = ArrayList<Cinema>()
 
     init {
-        val context : Context? = weakContext.get()
-        if (context != null) {
-            val jsonCache = JsonCache(context)
-            val cache = jsonCache.readMovies()
-            for (movie in cache)
-                movies[preHashTitle(movie.title)] = movie
-        }
+        MovieFactory.init(weakContext)
     }
 
     /**
@@ -50,16 +43,6 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
             var counter = 0
 
             document = Jsoup.connect(url).get()
-            elements = document.getElementsByClass(titleClassName)
-            //TODO: This for can be replaced with some high level function. Maybe.
-            for (element in elements) { //Downloading info for the missing Movies
-                if (element != elements[0] && elements[0].html() == element.html()) //TODO: Investigate that
-                    break
-
-                val movie_title = element.html()
-                if (!movies.contains(preHashTitle(movie_title)))
-                    movies[preHashTitle(movie_title)] = getMovieInfo(movie_title)
-            }
 
             //TODO: Organize this shit
             days = document.getElementsByClass(dayClassName)
@@ -69,9 +52,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
                 for (element in elements) {
                     val title = element.getElementsByClass(titleClassName)[0].html()
                     val rawDates = element.getElementsByClass(dataClassName)
-                    if (!movies.containsKey(preHashTitle(title)))
-                        movies[preHashTitle(title)] = getMovieInfo(title)
-                    val movie = movies[preHashTitle(title)]!!
+                    val movie = MovieFactory.getMovieInfo(title)
                     for (rawDate in rawDates) {
                         val dateString = rawDate.html()
                         val matches = hourRegex.findAll(dateString)
@@ -84,7 +65,7 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
                             calendar.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
                             calendar.add(Calendar.DAY_OF_MONTH, counter)
                             //TODO: Difference between
-                            cinema.addShow(Show(cinema.name, calendar.time, movie))
+                            cinema.addShow(Show(cinema.name, calendar.time, movie, true)) //TODO: Fix "true"
                         }
                     }
                 }
@@ -100,125 +81,17 @@ class GoogleMovies(private val weakContext: WeakReference<AppCompatActivity>) {
         for (cinema in movieTheaters) {
             val dates = cinema.getTimeSchedule(movie)
             for (date in dates)
-                shows.add(Show(cinema.name,date,movie))
+                shows.add(Show(cinema.name,date,movie,true)) //TODO: fix true
         }
         return shows
     }
 
-    fun getMovieInfo(movie_title: String) : Movie {
-        val context : Context? = weakContext.get()
-        if (movies[preHashTitle(movie_title)] != null)
-            return movies[preHashTitle(movie_title)]!!
-
-        val movie: Movie
-        val detailsUrl = "https://www.google.it/search?q="+Uri.encode(movie_title)+"+length"
-        val document = Jsoup.connect(detailsUrl).get()
-
-        val movie_length = getMovieLength(document)
-        val movie_description = getMovieDescription(document)
-        val movie_cast = getMovieCast(document)
-        val movie_releaseDate = getMovieReleaseDate(document)
-        val movie_image = getMovieImage(document)
-
-        movie = Movie(movie_title, movie_description, movie_cast, movie_releaseDate, movie_length, movie_image)
-        if (context != null) {
-            val jsonCache = JsonCache(context)
-            jsonCache.writeMovie(movie)
-        }
-
-        return movie
-    }
-
-    private fun getMovieImage(document: Document) : String {
-        val imageRegex = Regex("class=\"_WCg\" height=\"[0-9]*\" title=\"(.*?)\"")
-        val match = imageRegex.find(document.body().html())
-        if (match != null) {
-            val url : URL = URL(match.groupValues[1])
-            val inputStream = BufferedInputStream(url.openStream())
-            val out = ByteArrayOutputStream()
-            val buf = ByteArray(1024)
-            var n = inputStream.read(buf)
-            while (-1 != n) {
-                out.write(buf, 0, n)
-                n = inputStream.read(buf)
-            }
-            out.close()
-            inputStream.close()
-            val response = out.toByteArray()
-            val base64String = android.util.Base64.encodeToString(response,android.util.Base64.NO_WRAP)
-
-            return base64String
-        }
-        return ""
-    }
-
-    private fun getMovieLength(document: Document) : String {
-        var length : String = ""
-        val className = "_XWk"
-        val elements = document.getElementsByClass(className)
-
-        if (elements != null && elements.size > 0) {
-            length = elements[0].html()
-            length = decodeCommonHtmlEntities(length)
-        }
-        return length
-    }
-
-    private fun getMovieDescription(document: Document) : String {
-        var description: String = ""
-        val descriptionRegex = Regex("<span>(.*?)</span>",RegexOption.DOT_MATCHES_ALL)
-        val className = "_RBg"
-        val elements = document.getElementsByClass(className)
-
-        if (elements != null && elements.size > 0) {
-            var tmp = document.getElementsByClass(className)[0]
-            tmp = tmp.child(0)
-            val match = descriptionRegex.find(tmp.html())
-            if (match != null)
-                description = decodeCommonHtmlEntities(match.groupValues[1])
-        }
-
-        return description
-    }
-
-    private fun getMovieCast(document: Document) : ArrayList<String> {
-        val cast = ArrayList<String>()
-        val className = "kno-fb-ctx _Dnh kno-vrt-t"
-
-        if (document.getElementsByClass(className).size > 0) {
-            val rawElements = document.getElementsByClass(className)
-            for (rawElement in rawElements)
-                cast.add(rawElement.child(0).attr("title"))
-        }
-
-        return cast
-    }
-
-    private fun getMovieReleaseDate(document: Document) : String {
-        var releaseDate: String = ""
-        val releaseDateRegex = Regex("([0-9]{1,2} (gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre) [0-9]{4})")
-        val yearRegex = Regex("([0-9]{4})")
-
-
-        if (document.getElementsByClass("_Xbe kno-fv").size > 0) {
-            val rawHtml = document.getElementsByClass("_Xbe kno-fv")[0].html()
-            var match : MatchResult? = null
-            if (releaseDateRegex.containsMatchIn(rawHtml))
-                match = releaseDateRegex.find(rawHtml)
-            else if (yearRegex.containsMatchIn(rawHtml))
-                match = yearRegex.find(rawHtml)
-            if (match != null)
-                releaseDate = match.groupValues[0]
-        }
-
-        return releaseDate
-    }
 
     private fun populateMovieTheaters(movieTheaters: ArrayList<Cinema>) {
         //TODO: Need to populate that with movie_theaters.json, using a workaround for testing purposes
-        movieTheaters.add(Cinema("the space quartucciu"))
-        movieTheaters.add(Cinema("the space sestu"))
-        movieTheaters.add(Cinema("uci"))
+        movieTheaters.add(Cinema("the space quartucciu","cagliari"))
+        movieTheaters.add(Cinema("the space sestu","cagliari"))
+        movieTheaters.add(Cinema("uci","cagliari"))
     }
 
 }

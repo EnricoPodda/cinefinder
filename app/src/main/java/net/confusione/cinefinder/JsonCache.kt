@@ -67,8 +67,6 @@ class JsonCache(val context: Context) {
         writer.value(movie.releaseDate)
         writer.name("length")
         writer.value(movie.length)
-        writer.name("standard")
-        writer.value(movie.standard)
         writer.name("cast")
         writeMovies_Cast(movie.cast,writer)
         writer.endObject()
@@ -117,7 +115,7 @@ class JsonCache(val context: Context) {
                 reader.skipValue()
         }
         reader.endObject()
-        return Movie(title,description,cast,releaseDate,length,"",standard)
+        return Movie(title,description,releaseDate,"")
         //TODO = Image caches
     }
 

@@ -2,7 +2,7 @@ package net.confusione.cinefinder
 
 import java.util.*
 
-class Cinema(val name: String) {
+class Cinema(val name: String, val location: String) {
     private val shows = Hashtable<Movie,ArrayList<Date>>()
 
     fun addShow(show: Show) {
@@ -29,7 +29,18 @@ class Cinema(val name: String) {
             return ArrayList<Date>()
     }
 
-    override fun toString(): String {
-        return name
+    override fun equals(other: Any?): Boolean {
+        if (other is Cinema) {
+            if (this.name != other.name)
+                return false
+            if (this.location != other.location)
+                return false
+            return true
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return (this.name+this.location).hashCode()
     }
 }
