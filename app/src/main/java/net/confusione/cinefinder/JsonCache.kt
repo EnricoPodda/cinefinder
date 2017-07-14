@@ -2,6 +2,7 @@ package net.confusione.cinefinder
 import android.content.Context
 import android.util.JsonReader
 import android.util.JsonWriter
+import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -67,6 +68,8 @@ class JsonCache(val context: Context) {
         writer.value(movie.releaseDate)
         writer.name("length")
         writer.value(movie.length)
+        writer.name("image")
+        writer.value(movie.image)
         writer.name("cast")
         writeMovies_Cast(movie.cast,writer)
         writer.endObject()
@@ -81,7 +84,6 @@ class JsonCache(val context: Context) {
 
     private fun readMovies_List(reader: JsonReader) : ArrayList<Movie> {
         val movies = ArrayList<Movie>()
-        return  movies // ToDo = Enable caches
         reader.beginArray()
         while (reader.hasNext())
             movies.add(readMovies_Movie(reader))
@@ -96,6 +98,8 @@ class JsonCache(val context: Context) {
         var standard: Boolean = true
         var releaseDate: String = ""
         var cast : ArrayList<String> = ArrayList<String>()
+        var image = ""
+        val movie : Movie
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
@@ -111,12 +115,16 @@ class JsonCache(val context: Context) {
                 releaseDate = reader.nextString()
             else if (name == "cast")
                 cast = readMovies_Cast(reader)
+            else if (name == "image")
+                image = reader.nextString()
             else
                 reader.skipValue()
         }
         reader.endObject()
-        return Movie(title,description,releaseDate,"")
-        //TODO = Image caches
+        movie = Movie(title, description,releaseDate,image)
+        movie.cast = cast
+        movie.length = length
+        return movie
     }
 
     private fun readMovies_Cast(reader: JsonReader) : ArrayList<String> {

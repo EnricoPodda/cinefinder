@@ -18,8 +18,10 @@ class MovieFactory {
         private val apiKey = "b10ba5c83d0dc1b22753cd6767ac0987"
         val baseImageUrl= "http://image.tmdb.org/t/p/w185/"
         private val movies = Hashtable<String,Movie>()
+        private var weakContext: WeakReference<AppCompatActivity>? = null
 
         fun init(weakContext: WeakReference<AppCompatActivity>) {
+            this.weakContext = weakContext
             val context : Context? = weakContext.get()
             if (context != null) {
                 val jsonCache = JsonCache(context)
@@ -41,7 +43,7 @@ class MovieFactory {
             return ArrayList<Movie>(movies.values)
         }
 
-        fun getMovieInfo(title: String, weakContext: WeakReference<Context>? = null): Movie {
+        fun getMovieInfo(title: String): Movie {
             val preHash = preHashTitle(title)
             if (movies.containsKey(preHash))
                 return movies[preHash]!!
