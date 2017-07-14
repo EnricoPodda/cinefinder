@@ -33,4 +33,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:26.0.0-beta2'
     implementation files('libs/jsoup-1.10.3.jar')
+    compile group: 'joda-time', name: 'joda-time', version: '2.3'
 }
