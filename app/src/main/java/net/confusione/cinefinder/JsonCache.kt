@@ -11,6 +11,7 @@ import java.io.PrintWriter
 class JsonCache(val context: Context) {
 
     private val cacheFile = "cacheFile.json"
+    private val enabled = true
 
     fun writeMovie(movie: Movie) {
         val movies = readMovies()
@@ -19,6 +20,8 @@ class JsonCache(val context: Context) {
     }
 
     fun writeMovies(movies: ArrayList<Movie>) {
+        if (!enabled)
+            return
         val outputStream : PrintWriter = PrintWriter(context.openFileOutput(cacheFile,Context.MODE_PRIVATE))
         val writer = JsonWriter(outputStream)
         writer.setIndent("  ")
@@ -36,6 +39,8 @@ class JsonCache(val context: Context) {
 
     fun readMovies() : ArrayList<Movie> {
         var output = ArrayList<Movie>()
+        if (!enabled)
+            return output
         val file = context.getFileStreamPath(cacheFile)
         if (file != null && file.exists()) {
             val inputStream: InputStreamReader = InputStreamReader(context.openFileInput(cacheFile))
@@ -95,7 +100,6 @@ class JsonCache(val context: Context) {
         var title : String = ""
         var description: String = ""
         var length: String = ""
-        var standard: Boolean = true
         var releaseDate: String = ""
         var cast : ArrayList<String> = ArrayList<String>()
         var image = ""
@@ -109,8 +113,6 @@ class JsonCache(val context: Context) {
                 description = reader.nextString()
             else if (name == "length")
                 length = reader.nextString()
-            else if (name == "standard")
-                standard = reader.nextBoolean()
             else if (name == "releaseDate")
                 releaseDate = reader.nextString()
             else if (name == "cast")

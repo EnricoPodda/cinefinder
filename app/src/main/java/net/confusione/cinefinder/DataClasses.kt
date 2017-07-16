@@ -1,6 +1,6 @@
 package net.confusione.cinefinder
 
-import java.util.*
+import org.joda.time.*
 import kotlin.collections.ArrayList
 
 //This file contains only data classes (aka structures)
@@ -33,4 +33,8 @@ data class Movie(private val _title: String, val description: String, val releas
     }
 }
 
-data class Show(val cinema: String, val timeSchedule: Date, val movie: Movie, val standard: Boolean)
+enum class ShowType {
+    D3, STANDARD
+}
+
+data class Show(val cinema: String, val timeSchedule: DateTime, val movie: Movie, val showType: ShowType = ShowType.STANDARD)

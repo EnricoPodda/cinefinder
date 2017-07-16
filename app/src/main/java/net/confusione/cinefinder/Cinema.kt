@@ -1,16 +1,17 @@
 package net.confusione.cinefinder
 
+import org.joda.time.DateTime
 import java.util.*
 
 class Cinema(val name: String, val location: String) {
-    private val shows = Hashtable<Movie,ArrayList<Date>>()
+    private val shows = Hashtable<Movie,ArrayList<Show>>()
 
     fun addShow(show: Show) {
         if (shows.containsKey(show.movie))
-            shows[show.movie]!!.add(show.timeSchedule)
+            shows[show.movie]!!.add(show)
         else {
-            shows[show.movie] = ArrayList<Date>()
-            shows[show.movie]!!.add(show.timeSchedule)
+            shows[show.movie] = ArrayList<Show>()
+            shows[show.movie]!!.add(show)
         }
     }
 
@@ -21,12 +22,12 @@ class Cinema(val name: String, val location: String) {
         return result
     }
 
-    fun getTimeSchedule(movie: Movie) : ArrayList<Date> {
+    fun getShows(movie: Movie) : ArrayList<Show> {
         val result = shows[movie]
         if (result != null)
             return result
         else
-            return ArrayList<Date>()
+            return ArrayList<Show>()
     }
 
     override fun equals(other: Any?): Boolean {

@@ -48,7 +48,16 @@ class MovieFactory {
             if (movies.containsKey(preHash))
                 return movies[preHash]!!
 
-            val document  = downloadASCIIFile(buildSearchUrl(title))
+            val document : String
+            try {
+                document  = downloadASCIIFile(buildSearchUrl(title))
+            }
+            catch (ex: java.io.FileNotFoundException) {
+                val movie = Movie(title,"","","")
+                movies[preHash] = movie
+                return movie
+            }
+
 
             if (JSONObject(document).getJSONArray("results").length() == 0)
                 return Movie(title,"","","")

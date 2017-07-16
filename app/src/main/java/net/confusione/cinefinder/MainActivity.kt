@@ -142,7 +142,8 @@ class MainActivity : AppCompatActivity(){
 
             //TODO: date everywhere
             val time : DateTime = DateTime(shows[i].timeSchedule)
-            view.time_schedule.text = time.hourOfDay.toString() + ":" + time.minuteOfHour.toString()
+            val time_schedule_text = time.hourOfDay.toString() + ":" + time.minuteOfHour.toString()
+            view.time_schedule.text = time_schedule_text
 
             return view
 
